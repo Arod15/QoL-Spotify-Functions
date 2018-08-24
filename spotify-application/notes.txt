@@ -1,0 +1,18 @@
+Notes:
+
+Come to think of it, these notes are worthless since it is all detailed in the documentation.
+
+spotipy.Spotify().current_user_saved_tracks()
+    output: dictionary {}
+        keys: href, items, limit, next, offset, previous, total
+            items: list with actual content for each song
+            total: length of output (i.e. number of songs in library/playlist)
+    important: dictionary['items']['track']:
+        ...['track'][keys]: artists, availabe_markets, disc_number, duration_ms, explicit, external_ids, external_urls, href, id, is_local, name, popularity, track_number
+            important: artists, duration_ms, name, popularity
+
+total = 154
+154 - 50 = 104 songs left, offset is at 50 (first song in next retrievable batch)
+104 - 50 = 54 song left, offset is at 100
+54 - 50 = 4 songs left, offset is at 150
+4 - 50 - -46 songs left, offset is at 200
