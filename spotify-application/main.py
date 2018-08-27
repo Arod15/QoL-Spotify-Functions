@@ -1,8 +1,7 @@
 from spotipy import util
-# from spotipy.oauth2 import SpotifyClientCredentials
-# from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 import config
+import requests
 
 token = util.prompt_for_user_token(config.user,scope=config.scope,client_id=config.client_id,client_secret=config.client_secret, redirect_uri='http://localhost/')
 spotify = spotipy.Spotify(auth=token)
@@ -22,6 +21,7 @@ def extract_artist_song(response):
         song_id = response['items'][i]['track']['id']
         song = response['items'][i]['track']['name']
         library[song] = song_id
+# remove all songs found in playlists that are not found in your library
 def clean_playlists():
     # I am going to assume you don't have more than 50 playlists unless you are a madman.
     playlists = spotify.current_user_playlists(limit=50)
@@ -40,9 +40,22 @@ def clean_playlists():
             print(song_id + ', ' + song_name)
             if song_name not in library:
                 song_ids.append(song_id)
-        print(song_ids)
         if len(song_ids) != 0:
             spotify.user_playlist_remove_all_occurrences_of_tracks(config.user, playlist_id=playlist_ids[i], tracks=song_ids)
-        print(song_ids)
-extract_library()
-clean_playlists()
+# create a playlist of many songs from artists you would like to listen to
+def all_songs_from_artist():
+    return
+def recommended_playlist():
+    client_id = 'client_id=' + config.client_id
+    scope_split = config.scope.split()
+    scope = ''
+    for x in scope_split:
+        scope += str(x) + '%20'
+    scope = scope[:-3]
+    url = 'https://accounts.spotify.com/authorize/?' + client_id + '&response_type=code' + '&redirect_uri=http%3A%2F%2Flocalhost%2F' + '&scope=' + scope
+    print(url)
+    response = requests.get(url)
+    print(response.status_code)
+# extract_library()
+# print(library)
+recommended_playlist()
