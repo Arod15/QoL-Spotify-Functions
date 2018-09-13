@@ -1,5 +1,6 @@
 import requests
 import config
+import json
 
 def recommended_playlist():
     client_id = 'client_id=' + config.client_id
@@ -12,5 +13,5 @@ def recommended_playlist():
     print(url)
     response = requests.get(url)
     print(response.status_code)
-    print(response)
+    print(response.json())
 recommended_playlist()

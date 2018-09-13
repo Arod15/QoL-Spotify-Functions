@@ -20,7 +20,9 @@ def extract_artist_song(response):
     for i in range(song_batch_len):
         song_id = response['items'][i]['track']['id']
         song = response['items'][i]['track']['name']
-        library[song] = song_id
+        artist = response['items'][i]['track']['artists'][0]['name']
+        artist_id = response['items'][i]['track']['artists'][0]['id']
+        library[song] = [song_id, artist, artist_id]
 # remove all songs found in playlists that are not found in your library
 def clean_playlists():
     # I am going to assume you don't have more than 50 playlists unless you are a madman.
@@ -43,19 +45,41 @@ def clean_playlists():
         if len(song_ids) != 0:
             spotify.user_playlist_remove_all_occurrences_of_tracks(config.user, playlist_id=playlist_ids[i], tracks=song_ids)
 # create a playlist of many songs from artists you would like to listen to
-def all_songs_from_artist():
-    return
-def recommended_playlist():
-    client_id = 'client_id=' + config.client_id
-    scope_split = config.scope.split()
-    scope = ''
-    for x in scope_split:
-        scope += str(x) + '%20'
-    scope = scope[:-3]
-    url = 'https://accounts.spotify.com/authorize/?' + client_id + '&response_type=code' + '&redirect_uri=http%3A%2F%2Flocalhost%2F' + '&scope=' + scope
-    print(url)
-    response = requests.get(url)
-    print(response.status_code)
-# extract_library()
-# print(library)
-recommended_playlist()
+def top_songs_from_artist_library(artists):
+    for artist in artists:
+        top_songs = spotify.artist_top_tracks(str(artist))['items']['track']['id']
+        print(top_songs)
+        break
+    return []
+def retrieve_artists_library():
+    artists = {}
+    for key in library:
+        artists[library[key][2]] = 0
+    return artists
+def artists_song_dump_playlist():
+    all_playlists = spotify.current_user_playlists()
+    all_playlists = all_playlists['items']
+    
+    found = False
+    dump_id = ''
+
+    for playlist in all_playlists:
+        if found:
+            break
+        if playlist['name'] == 'Song Dump':
+            found = True
+            dump_id = playlist['id']
+
+    if not found:
+        # create the playlist and find the id
+        spotify.user_playlist_create(config.user, 'Song Dump', public=True)
+        for playlist in all_playlists:
+            if playlist['name'] == 'Song Dump':
+                dump_id = playlist['id']
+    all_artists = retrieve_artists_library()
+    dump_songs = top_songs_from_artist_library(all_artists)
+    print(dump_songs)
+    # spotify.user_playlist_add_tracks(user=config.user, playlist_id=dump_id, tracks=dump_songs, position=None)
+extract_library()
+print(library)
+artists_song_dump_playlist()
